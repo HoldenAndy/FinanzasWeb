@@ -9,7 +9,7 @@ import { LoginRequest, RegisterRequest, AuthResponse, UserInfo, VerificationRequ
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/auth';
+  private readonly apiUrl = 'http://localhost:8080/auth';
 
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -31,7 +31,12 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+    const payload = {
+      nombre: `${data.firstName} ${data.lastName}`.trim(),
+      email: data.email,
+      password: data.password
+    };
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, payload).pipe(
       tap((response) => {
         this.setToken(response.token);
         this.currentUserSubject.next(response.user);
