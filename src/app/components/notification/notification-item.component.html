@@ -1,0 +1,7 @@
+<div class="notification" [ngClass]="notification.type" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+    <div class="content">
+        <div class="title">{{ notification.title }}</div>
+        <div class="message">{{ notification.message }}</div>
+    </div>
+    <button class="close-btn" (click)="onClose()">×</button>
+</div>

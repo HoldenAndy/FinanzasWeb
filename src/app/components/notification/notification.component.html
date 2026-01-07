@@ -1,0 +1,5 @@
+<div class="notification-container">
+  <app-notification-item *ngFor="let notification of notifications$ | async" [notification]="notification"
+    (close)="close($event)">
+  </app-notification-item>
+</div>
