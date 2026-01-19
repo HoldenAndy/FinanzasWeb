@@ -1,122 +1,66 @@
-/* You can add global styles to this file, and also import other style files */
+/* Importar fuente DM Sans como pide el diseño */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html, body {
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  :root {
+    /* MODO CLARO (Default de shadcn, pero Loveable suele forzar oscuro en config) */
+    /* Aquí forzamos el modo OSCURO por defecto como en las imágenes de Melon Mind */
+    --background: 0 0% 0%;         /* Negro puro para coincidir con header */
+    --foreground: 0 0% 98%;        /* Blanco */
 
-body {
-  background-color: #f5f7fa;
-  color: #2d3748;
-}
+    --card: 0 0% 6%;               /* Un poco más claro que el fondo */
+    --card-foreground: 0 0% 98%;
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
+    --primary: 0 0% 98%;           /* Blanco */
+    --primary-foreground: 0 0% 8%; /* Negro */
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 4px;
-}
+    --secondary: 0 0% 12%;         /* Gris oscuro */
+    --secondary-foreground: 0 0% 98%;
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
-}
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
 
-/* Utility Classes */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 98%;
 
-.text-center {
-  text-align: center;
-}
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
 
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 1rem; }
-.mt-4 { margin-top: 1.5rem; }
-.mt-5 { margin-top: 2.5rem; }
+    --border: 0 0% 15%;            /* Bordes sutiles */
+    --input: 0 0% 15%;
+    --ring: 0 0% 83.9%;
 
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 1rem; }
-.mb-4 { margin-bottom: 1.5rem; }
-.mb-5 { margin-bottom: 2.5rem; }
+    --radius: 0.75rem;
 
-.p-1 { padding: 0.25rem; }
-.p-2 { padding: 0.5rem; }
-.p-3 { padding: 1rem; }
-.p-4 { padding: 1.5rem; }
-.p-5 { padding: 2.5rem; }
-
-/* Focus Styles for Accessibility */
-button:focus-visible,
-input:focus-visible,
-a:focus-visible {
-  outline: 2px solid #667eea;
-  outline-offset: 2px;
-}
-
-/* Loading Animation */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+    /* Custom Tokens de Loveable */
+    --melon-green: 142 76% 46%;
+    --melon-green-light: 142 76% 15%;
+    --surface-elevated: 0 0% 3%;   /* Fondo para secciones alternadas más oscuro */
+    --text-subtle: 0 0% 55%;
+    
+    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.05), 0 2px 4px rgb(0 0 0 / 0.2), 0 12px 24px rgb(0 0 0 / 0.2);
   }
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-/* Fade Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+@layer base {
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500;
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-in;
-}
-
-/* Responsive Typography */
-@media (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-
-  h1 {
-    font-size: 24px;
-  }
-
-  h2 {
-    font-size: 20px;
-  }
-
-  h3 {
-    font-size: 18px;
-  }
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }

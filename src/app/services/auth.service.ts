@@ -11,21 +11,30 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8080/auth';
 
-  private currentUserSubject = new BehaviorSubject<UserInfo | null>(this.getUserFromStorage());
-  public currentUser$ = this.currentUserSubject.asObservable();
+  // Inicializamos subjects
+  private currentUserSubject: BehaviorSubject<UserInfo | null>;
+  public currentUser$: Observable<UserInfo | null>;
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private isAuthenticatedSubject: BehaviorSubject<boolean>;
+  public isAuthenticated$: Observable<boolean>;
 
   constructor() {
-    this.restoreSession();
+    // 1. Intentamos recuperar usuario de forma segura
+    const savedUser = this.getUserFromStorage();
+    const hasToken = this.hasToken();
+
+    // 2. Inicializamos el estado basado en lo recuperado
+    this.currentUserSubject = new BehaviorSubject<UserInfo | null>(savedUser);
+    this.currentUser$ = this.currentUserSubject.asObservable();
+
+    this.isAuthenticatedSubject = new BehaviorSubject<boolean>(hasToken && !!savedUser);
+    this.isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response) => {
-        this.setToken(response.token);
-        this.currentUserSubject.next(response.user);
+        this.setSession(response);
       })
     );
   }
@@ -38,8 +47,7 @@ export class AuthService {
     };
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, payload).pipe(
       tap((response) => {
-        this.setToken(response.token);
-        this.currentUserSubject.next(response.user);
+        this.setSession(response);
       })
     );
   }
@@ -47,8 +55,7 @@ export class AuthService {
   verifyEmail(verificationData: VerificationRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/verify-email`, verificationData).pipe(
       tap((response) => {
-        this.setToken(response.token);
-        this.currentUserSubject.next(response.user);
+        this.setSession(response);
       })
     );
   }
@@ -64,8 +71,17 @@ export class AuthService {
     return localStorage.getItem('auth_token');
   }
 
-  private setToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+  // --- MÉTODOS PRIVADOS Y UTILITARIOS ---
+
+  private setSession(response: AuthResponse): void {
+    localStorage.setItem('auth_token', response.token);
+    
+    // Si el backend devuelve info del usuario, la guardamos
+    if (response.user) {
+      localStorage.setItem('user_info', JSON.stringify(response.user));
+      this.currentUserSubject.next(response.user);
+    }
+    
     this.isAuthenticatedSubject.next(true);
   }
 
@@ -73,17 +89,21 @@ export class AuthService {
     return !!localStorage.getItem('auth_token');
   }
 
+  /**
+   * Recupera el usuario del Storage de forma SEGURA (Blindado contra errores JSON)
+   */
   private getUserFromStorage(): UserInfo | null {
-    const user = localStorage.getItem('user_info');
-    return user ? JSON.parse(user) : null;
-  }
+    const userStr = localStorage.getItem('user_info');
+    if (!userStr) return null;
 
-  private restoreSession(): void {
-    if (this.hasToken()) {
-      const user = this.getUserFromStorage();
-      if (user) {
-        this.currentUserSubject.next(user);
-      }
+    try {
+      // Intentamos parsear. Si 'userStr' es "undefined" o basura, esto fallará.
+      return JSON.parse(userStr);
+    } catch (error) {
+      console.warn('Datos de usuario corruptos en localStorage. Limpiando sesión...', error);
+      // Auto-reparación: Borramos los datos dañados para evitar crash
+      this.logout(); 
+      return null;
     }
   }
 
